@@ -62,6 +62,11 @@ impl Paddle
         }
     }
 
+    pub fn rect(&self) -> Rect
+    {
+        self.rect
+    }
+
     pub fn draw(&self, ctx: &mut Context) -> GameResult<()>
     {
         graphics::draw(ctx, &self.mesh, DrawParam::default()

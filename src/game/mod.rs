@@ -8,13 +8,17 @@ use ggez::
     }
 };
 
+mod utils;
 mod paddle;
+mod ball;
 
 use paddle::Paddle;
+use ball::Ball;
 
 pub struct Game
 {
     paddle: Paddle,
+    ball: Ball,
 
     game_data: GameData,
     input_data: InputData,
@@ -27,6 +31,7 @@ impl Game
         Ok(Game
         {
             paddle: Paddle::new(ctx)?,
+            ball: Ball::new(ctx, [250f32, 250f32], [1.0, -1.2])?,
             
             game_data: GameData
             {
@@ -50,6 +55,8 @@ impl Game
         {
             self.paddle.shift(self.game_data.paddle_speed);
         }
+
+        self.ball.update(&self.paddle);
 
         Ok(())
     }
@@ -76,7 +83,8 @@ impl Game
 
     pub fn draw(&mut self, ctx: &mut Context) -> GameResult<()>
     {
-        self.paddle.draw(ctx)
+        self.paddle.draw(ctx)?;
+        self.ball.draw(ctx)
     }
 }
 
