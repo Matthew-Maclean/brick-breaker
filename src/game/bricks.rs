@@ -1,0 +1,129 @@
+use ggez::
+{
+    Context,
+    GameResult,
+    graphics::
+    {
+        self,
+        Rect,
+        Mesh,
+        Color,
+        DrawMode,
+        DrawParam,
+    },
+};
+
+use crate::{BOARD_WIDTH, FOREHEAD};
+
+pub const BRICK_WIDTH: f32 = 32.36f32;
+pub const BRICK_HEIGHT: f32 = 20f32;
+
+pub struct Bricks
+{
+    bricks: Vec<Option<Brick>>,
+
+    mesh: Mesh,
+}
+
+impl Bricks
+{
+    pub fn new(ctx: &mut Context, pattern: Vec<((f32, f32), u32)>) -> GameResult<Bricks>
+    {
+        Ok(Bricks
+        {
+            bricks: pattern.into_iter()
+                .map(|((x, y), c)| { Some(Brick
+                {
+                    rect: Rect::new(x, y, BRICK_WIDTH, BRICK_HEIGHT),
+                    count: c,
+                })})
+                .collect(),
+
+            mesh: Mesh::new_rectangle(
+                ctx,
+                DrawMode::fill(),
+                Rect::new(0f32, 0f32, BRICK_WIDTH, BRICK_HEIGHT),
+                graphics::WHITE)?,
+        })
+    }
+
+    pub fn bricks(&mut self) -> &mut [Option<Brick>]
+    {
+        &mut self.bricks
+    }
+
+    pub fn draw(&self, ctx: &mut Context) -> GameResult<()>
+    {
+        for brick in &self.bricks
+        {
+            if let Some(brick) = brick
+            {
+                graphics::draw(ctx, &self.mesh, DrawParam::new()
+                    .dest(brick.rect.point())
+                    .color(Bricks::get_color(brick.count)))?;
+            }
+        }
+
+        Ok(())
+    }
+
+    fn get_color(c: u32) -> Color
+    {
+        match c
+        {
+            0  => Color::from_rgb(255, 255, 255),
+            1  => Color::from_rgb(255, 0  , 0  ),
+            2  => Color::from_rgb(255, 64 , 0  ),
+            3  => Color::from_rgb(255, 191, 0  ),
+            4  => Color::from_rgb(255, 255, 0  ),
+            5  => Color::from_rgb(191, 255, 0  ),
+            6  => Color::from_rgb(128, 255, 0  ),
+            7  => Color::from_rgb(64 , 255, 0  ),
+            8  => Color::from_rgb(0  , 255, 0  ),
+            9  => Color::from_rgb(0  , 255, 64 ),
+            10 => Color::from_rgb(0  , 255, 128),
+            11 => Color::from_rgb(0  , 255, 191),
+            12 => Color::from_rgb(0  , 255, 255),
+            13 => Color::from_rgb(0  , 191, 255),
+            14 => Color::from_rgb(0  , 128, 255),
+            15 => Color::from_rgb(0  , 64 , 255),
+            16 => Color::from_rgb(0  , 0  , 255),
+            17 => Color::from_rgb(64 , 0  , 255),
+            18 => Color::from_rgb(128, 0  , 255),
+            19 => Color::from_rgb(191, 0  , 255),
+            20 => Color::from_rgb(255, 0  , 255),
+            _  => Color::from_rgb(255, 255, 255),
+        }
+    }
+
+    pub fn make_pattern(p: Vec<Vec<u32>>) -> Vec<((f32, f32), u32)>
+    {
+        let mut pattern = Vec::new();
+
+        for (y, row) in p.into_iter().enumerate()
+        {
+            let offset = (BOARD_WIDTH - row.len() as f32 * BRICK_WIDTH) / 2f32;
+            for (x, c) in row.into_iter().enumerate()
+            {
+                if c > 0
+                {
+                    pattern.push((
+                        (
+                            offset + x as f32 * BRICK_WIDTH,
+                            y as f32 * BRICK_HEIGHT + FOREHEAD
+                        ),
+                        c
+                    ));
+                }
+            }
+        }
+
+        pattern
+    }
+}
+
+pub struct Brick
+{
+    pub rect: Rect,
+    pub count: u32,
+}

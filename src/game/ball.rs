@@ -14,6 +14,7 @@ use ggez::
 use crate::{BOARD_WIDTH, BOARD_HEIGHT, FOREHEAD};
 
 use super::paddle::Paddle;
+use super::bricks::Bricks;
 use super::utils;
 
 const BALL_SIZE: f32 = 5f32;
@@ -50,7 +51,7 @@ impl Ball
         })
     }
 
-    pub fn update(&mut self, paddle: &Paddle) -> bool
+    pub fn update(&mut self, paddle: &Paddle, bricks: &mut Bricks) -> bool
     {
         // project position
         let proj =
@@ -82,6 +83,42 @@ impl Ball
             Some(utils::Axis::X) => bounce_x_axis = true,
             Some(utils::Axis::Y) => bounce_y_axis = true,
             None => { }
+        }
+
+        let mut dist = ::std::f32::MAX;
+        let mut collision = None;
+        for brick in bricks.bricks().iter_mut() // bricks
+        {
+            if let Some(b) = brick
+            {
+                if let Some(axis) = utils::intersect_rect(self.pos, proj, self.size, b.rect)
+                {
+                    let d = utils::dist_to_rect(self.pos, b.rect);
+                    if d < dist
+                    {
+                        dist = d;
+                        collision = Some((axis, brick))
+                    }
+                }
+            }
+        }
+
+        if let Some((axis, brick)) = collision
+        {
+            match axis
+            {
+                utils::Axis::X => bounce_x_axis = true,
+                utils::Axis::Y => bounce_y_axis = true,
+            }
+
+            if let Some(b) = brick
+            {
+                b.count -= 1;
+                if b.count == 0
+                {
+                    *brick = None;
+                }
+            }
         }
 
         if bounce_x_axis
