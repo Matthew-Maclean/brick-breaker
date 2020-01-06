@@ -127,16 +127,10 @@ pub fn intersect_rect(o: [f32; 2], p: [f32; 2], s: f32, r: ggez::graphics::Rect)
     None
 }
 
+// distance to the center of the rectangle
 pub fn dist_to_rect(p: [f32; 2], r: ggez::graphics::Rect) -> f32
 {
-    f32::min(
-        f32::min(
-            f32::abs(p[0] - r.left()),
-            f32::abs(p[0] - r.right())
-        ),
-        f32::min(
-            f32::abs(p[1] - r.top()),
-            f32::abs(p[1] - r.bottom())
-        ),
-    )
+    let c = [r.x + r.w / 2.0, r.y + r.h / 2.0];
+
+    f32::sqrt(f32::powi(p[0] - c[0], 2) + f32::powi(p[1] - c[1], 2))
 }
