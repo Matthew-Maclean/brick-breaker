@@ -34,7 +34,7 @@ impl Game
         Ok(Game
         {
             paddle: Paddle::new(ctx)?,
-            ball: Ball::new(ctx, [250f32, 250f32], [1.0, -1.2])?,
+            ball: Ball::new(ctx, [250f32, 250f32], [1.0, -1.7])?,
             bricks: Bricks::new(ctx, Bricks::make_pattern(vec![
                 vec![],
                 vec![1, 2, 3, 4, 5, 6, 7, 8, 9, 10],

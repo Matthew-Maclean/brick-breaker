@@ -80,7 +80,25 @@ impl Ball
 
         match utils::intersect_rect(self.pos, proj, self.size, paddle.rect())
         {
-            Some(utils::Axis::X) => bounce_x_axis = true,
+            Some(utils::Axis::X) =>
+            {
+                let r = paddle.rect();
+
+                // if the projected collision is on the left quarter or right quarter,
+                // bounce the ball on an angle
+                if proj[0] < r.x + r.w * 0.25
+                {
+                    self.dir = utils::bounce_angle(self.dir, [10.0, -2.0]);
+                }
+                else if proj[0] > r.x + r.w * 0.75
+                {
+                    self.dir = utils::bounce_angle(self.dir, [10.0, 2.0]);
+                }
+                else
+                {
+                    bounce_x_axis = true;
+                }
+            },
             Some(utils::Axis::Y) => bounce_y_axis = true,
             None => { }
         }
@@ -135,6 +153,12 @@ impl Ball
             self.pos[0] + self.dir[0] * self.speed,
             self.pos[1] + self.dir[1] * self.speed
         ];
+
+        // if the ball has found itself inside the paddle, get it out of there!
+        if let Some(pos) = utils::inside_rect(self.pos, self.size, paddle.rect())
+        {
+            self.pos = pos;
+        }
 
         true
     }

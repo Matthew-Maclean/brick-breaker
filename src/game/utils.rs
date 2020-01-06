@@ -3,14 +3,36 @@ pub fn len(v: [f32; 2]) -> f32
     f32::sqrt(f32::powi(v[0], 2) + f32::powi(v[1], 2))
 }
 
+pub fn sub(l: [f32; 2], r: [f32; 2]) -> [f32; 2]
+{
+    [l[0] - r[0], l[1] - r[1]]
+}
+
 pub fn div(v: [f32; 2], n: f32) -> [f32; 2]
 {
     [v[0] / n, v[1] / n]
 }
 
+pub fn mul(v: [f32; 2], n: f32) -> [f32; 2]
+{
+    [v[0] * n, v[1] * n]
+}
+
+pub fn dot(l: [f32; 2], r: [f32; 2]) -> f32
+{
+    l[0] * r[0] + l[1] * r[1]
+}
+
 pub fn normalize(v: [f32; 2]) -> [f32; 2]
 {
     div(v, len(v))
+}
+
+pub fn bounce_angle(v: [f32; 2], n: [f32; 2]) -> [f32; 2]
+{
+    let n = normalize(n);
+    // 2(v . n)n - v
+    sub(mul(mul(n, dot(n, v)), 2.0), v)
 }
 
 #[derive(Copy, Clone, Debug, PartialEq, Eq)]
@@ -133,4 +155,37 @@ pub fn dist_to_rect(p: [f32; 2], r: ggez::graphics::Rect) -> f32
     let c = [r.x + r.w / 2.0, r.y + r.h / 2.0];
 
     f32::sqrt(f32::powi(p[0] - c[0], 2) + f32::powi(p[1] - c[1], 2))
+}
+
+// if the point is inside the rect, returns the closest point that's outside the rect (with the size)
+pub fn inside_rect(p: [f32; 2], s: f32, r: ggez::graphics::Rect) -> Option<[f32; 2]>
+{
+    if r.contains(p)
+    {
+        let dleft = f32::abs(p[0] - r.left());
+        let dright = f32::abs(p[0] - r.right());
+        let dtop = f32::abs(p[1] - r.top());
+        let dbottom = f32::abs(p[1] - r.bottom());
+
+        if dleft < f32::min(f32::min(dtop, dbottom), dright)
+        {
+            Some([r.left() - s, p[1]])
+        }
+        else if dright < f32::min(f32::min(dtop, dbottom), dleft)
+        {
+            Some([r.right() + s, p[1]])
+        }
+        else if dtop < f32::min(f32::min(dleft, dright), dbottom)
+        {
+            Some([p[0], r.top() - s])
+        }
+        else // dbottom < f32::min(f32::min(dleft, dright), dtop)
+        {
+            Some([p[0], r.bottom() + s])
+        }
+    }
+    else
+    {
+        None
+    }
 }
