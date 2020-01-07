@@ -189,3 +189,16 @@ pub fn inside_rect(p: [f32; 2], s: f32, r: ggez::graphics::Rect) -> Option<[f32;
         None
     }
 }
+
+pub fn rotate(v: [f32; 2], a: f32) -> [f32; 2]
+{
+    [
+        f32::cos(a) * v[0] - f32::sin(a) * v[1],
+        f32::sin(a) * v[0] + f32::cos(a) * v[1]
+    ]
+}
+
+pub fn angle_between(v: [f32; 2], n: [f32; 2]) -> f32
+{
+    f32::acos(dot(v, n) / (len(v) * len(n)))
+}

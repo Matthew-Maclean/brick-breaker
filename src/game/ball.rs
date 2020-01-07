@@ -17,7 +17,7 @@ use super::paddle::Paddle;
 use super::bricks::Bricks;
 use super::utils;
 
-const BALL_SIZE: f32 = 5f32;
+pub const BALL_SIZE: f32 = 5f32;
 const BALL_SPEED: f32 = 2.5f32;
 
 pub struct Ball
