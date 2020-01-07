@@ -48,6 +48,15 @@ impl Paddle
         })
     }
 
+    pub fn reset(&mut self)
+    {
+        self.rect = Rect::new(
+            BOARD_WIDTH / 2.0 - PADDLE_WIDTH / 2.0,
+            PADDLE_Y,
+            PADDLE_WIDTH,
+            PADDLE_HEIGHT);
+    }
+
     pub fn shift(&mut self, dx: f32)
     {
         self.rect.translate([dx, 0f32]);

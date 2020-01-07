@@ -170,7 +170,7 @@ impl Game
                 }
                 if self.pause_ui.restart_click()
                 {
-                    // todo
+                    self.reset();
                 }
                 if self.pause_ui.main_menu_click()
                 {
@@ -180,6 +180,30 @@ impl Game
         }
         
         Ok(())
+    }
+
+    pub fn reset(&mut self)
+    {
+        self.paddle.reset();
+        self.ball = None;
+        self.bricks.reset();
+        self.pause_ui.reset();
+
+        self.phase = Phase::Shoot(utils::normalize([0.0, -1.0]));
+
+        self.game_data = GameData
+        {
+            paddle_speed: 3.5f32,
+            pause_transition: false,
+        };
+        self.input_data = InputData
+        {
+            left_down: false,
+            right_down: false,
+            enter_down: false,
+            p_down: false,
+        };
+
     }
 
     pub fn key_down(&mut self, key: KeyCode, _repeat: bool)

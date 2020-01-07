@@ -21,7 +21,7 @@ pub const BRICK_HEIGHT: f32 = 20f32;
 pub struct Bricks
 {
     bricks: Vec<Option<Brick>>,
-
+    reset: Vec<Option<Brick>>,
     mesh: Mesh,
 }
 
@@ -29,16 +29,17 @@ impl Bricks
 {
     pub fn new(ctx: &mut Context, pattern: Vec<((f32, f32), u32)>) -> GameResult<Bricks>
     {
+        let bricks = pattern.into_iter()
+            .map(|((x, y), c)| { Some(Brick
+            {
+                rect: Rect::new(x, y, BRICK_WIDTH, BRICK_HEIGHT),
+                count: c,
+            })})
+            .collect::<Vec<_>>();
         Ok(Bricks
         {
-            bricks: pattern.into_iter()
-                .map(|((x, y), c)| { Some(Brick
-                {
-                    rect: Rect::new(x, y, BRICK_WIDTH, BRICK_HEIGHT),
-                    count: c,
-                })})
-                .collect(),
-
+            bricks: bricks.clone(),
+            reset: bricks,
             mesh: Mesh::new_rectangle(
                 ctx,
                 DrawMode::fill(),
@@ -50,6 +51,11 @@ impl Bricks
     pub fn bricks(&mut self) -> &mut [Option<Brick>]
     {
         &mut self.bricks
+    }
+
+    pub fn reset(&mut self)
+    {
+        self.bricks = self.reset.clone();
     }
 
     pub fn draw(&self, ctx: &mut Context) -> GameResult<()>
@@ -122,6 +128,7 @@ impl Bricks
     }
 }
 
+#[derive(Copy, Clone)]
 pub struct Brick
 {
     pub rect: Rect,
