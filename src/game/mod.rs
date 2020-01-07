@@ -5,17 +5,20 @@ use ggez::
     input::
     {
         keyboard::KeyCode,
-    }
+        mouse::MouseButton,
+    },
 };
 
 mod utils;
 mod paddle;
 mod ball;
 mod bricks;
+mod pause_ui;
 
 use paddle::Paddle;
 use ball::Ball;
 use bricks::Bricks;
+use pause_ui::PauseUI;
 
 const LINE_LENGTH: f32 = 30.0;
 const ANGLE_CHANGE: f32 = 0.04;
@@ -25,6 +28,7 @@ pub struct Game
     paddle: Paddle,
     ball: Option<Ball>,
     bricks: Bricks,
+    pause_ui: PauseUI,
 
     phase: Phase,
 
@@ -45,12 +49,13 @@ impl Game
                 vec![1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
                 vec![11, 12, 13, 14, 15, 16, 17, 18, 19, 20]
             ]))?,
+            pause_ui: PauseUI::new(ctx)?,
 
             phase: Phase::Shoot(utils::normalize([0.0, -1.0])),
-            
+
             game_data: GameData
             {
-                paddle_speed: 5f32,
+                paddle_speed: 3.5f32,
                 pause_transition: false,
             },
             input_data: InputData
@@ -156,6 +161,21 @@ impl Game
                         self.game_data.pause_transition = true;
                     }
                 }
+
+                if self.pause_ui.resume_click()
+                {
+                    self.pause_ui.reset();
+
+                    self.phase = Phase::Bounce;
+                }
+                if self.pause_ui.restart_click()
+                {
+                    // todo
+                }
+                if self.pause_ui.main_menu_click()
+                {
+                    unimplemented!()
+                }
             },
         }
         
@@ -182,6 +202,42 @@ impl Game
             KeyCode::Right => self.input_data.right_down = false,
             KeyCode::Return => self.input_data.enter_down = false,
             KeyCode::P => self.input_data.p_down = false,
+            _ => { }
+        }
+    }
+
+    pub fn mouse_move(&mut self, x: f32, y: f32)
+    {
+        match self.phase
+        {
+            Phase::Pause =>
+            {
+                self.pause_ui.mouse_move(x, y);
+            },
+            _ => { }
+        }
+    }
+
+    pub fn mouse_down(&mut self, button: MouseButton, x: f32, y: f32)
+    {
+        match self.phase
+        {
+            Phase::Pause =>
+            {
+                self.pause_ui.mouse_down(button, x, y);
+            },
+            _ => { }
+        }
+    }
+
+    pub fn mouse_up(&mut self, button: MouseButton)
+    {
+        match self.phase
+        {
+            Phase::Pause =>
+            {
+                self.pause_ui.mouse_up(button);
+            },
             _ => { }
         }
     }
@@ -219,7 +275,10 @@ impl Game
                 graphics::draw(ctx, &line, graphics::DrawParam::new())?;
             },
             Phase::Bounce => { },
-            Phase::Pause => { },
+            Phase::Pause =>
+            {
+                self.pause_ui.draw(ctx)?;
+            },
         }
 
         Ok(())

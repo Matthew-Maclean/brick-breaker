@@ -20,6 +20,7 @@ const FOREHEAD: f32 = 50f32;
 const WIDTH: f32 = BOARD_WIDTH;
 const HEIGHT: f32 = BOARD_HEIGHT + FOREHEAD;
 
+mod ui;
 mod window;
 mod game;
 
