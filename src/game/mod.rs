@@ -51,12 +51,14 @@ impl Game
             game_data: GameData
             {
                 paddle_speed: 5f32,
+                pause_transition: false,
             },
             input_data: InputData
             {
                 left_down: false,
                 right_down: false,
                 enter_down: false,
+                p_down: false,
             },
         })
     }
@@ -118,8 +120,43 @@ impl Game
                         self.phase = Phase::Shoot([0.0, -1.0])
                     }
                 }
+
+                if self.game_data.pause_transition
+                {
+                    if !self.input_data.p_down
+                    {
+                        self.game_data.pause_transition = false;
+                    }
+                }
+                
+                if !self.game_data.pause_transition
+                {
+                    if self.input_data.p_down
+                    {
+                        self.phase = Phase::Pause;
+                        self.game_data.pause_transition = true;
+                    }
+                }
             },
-            Phase::Pause => { },
+            Phase::Pause =>
+            {
+                if self.game_data.pause_transition
+                {
+                    if !self.input_data.p_down
+                    {
+                        self.game_data.pause_transition = false;
+                    }
+                }
+
+                if !self.game_data.pause_transition
+                {
+                    if self.input_data.p_down
+                    {
+                        self.phase = Phase::Bounce;
+                        self.game_data.pause_transition = true;
+                    }
+                }
+            },
         }
         
         Ok(())
@@ -132,6 +169,7 @@ impl Game
             KeyCode::Left => self.input_data.left_down = true,
             KeyCode::Right => self.input_data.right_down = true,
             KeyCode::Return => self.input_data.enter_down = true,
+            KeyCode::P => self.input_data.p_down = true,
             _ => { }
         }
     }
@@ -143,6 +181,7 @@ impl Game
             KeyCode::Left => self.input_data.left_down = false,
             KeyCode::Right => self.input_data.right_down = false,
             KeyCode::Return => self.input_data.enter_down = false,
+            KeyCode::P => self.input_data.p_down = false,
             _ => { }
         }
     }
@@ -190,6 +229,7 @@ impl Game
 struct GameData
 {
     paddle_speed: f32,
+    pause_transition: bool,
 }
 
 struct InputData
@@ -197,6 +237,7 @@ struct InputData
     left_down: bool,
     right_down: bool,
     enter_down: bool,
+    p_down: bool,
 }
 
 enum Phase
