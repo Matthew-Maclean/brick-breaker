@@ -19,6 +19,9 @@ pub struct TextRect
     text: Text,
     rect: Rect,
     color: Color,
+
+    font: Font,
+    scale: Scale,
 }
 
 impl TextRect
@@ -43,6 +46,8 @@ impl TextRect
             text: t,
             rect: Rect::new(x, y, d.0 as f32, d.1 as f32),
             color: if let Some(c) = color { c } else { graphics::BLACK },
+            font: if let Some(f) = font { f } else { Font::default() },
+            scale: Scale::uniform(scale),
         }
     }
 
@@ -53,6 +58,17 @@ impl TextRect
         self.rect.move_to([x, self.rect.y]);
 
         self
+    }
+
+    pub fn change_text(&mut self, ctx: &mut Context, text: impl ToString)
+    {
+        let mut t = Text::new(text.to_string());
+        t.set_font(self.font, self.scale);
+        
+        let d = t.dimensions(ctx);
+
+        self.text = t;
+        self.rect = Rect::new(self.rect.x, self.rect.y, d.0 as f32, d.1 as f32);
     }
 
     pub fn rect(&self) -> Rect

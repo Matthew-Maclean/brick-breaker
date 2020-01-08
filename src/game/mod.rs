@@ -9,16 +9,20 @@ use ggez::
     },
 };
 
+use std::time::{Instant, Duration};
+
 mod utils;
 mod paddle;
 mod ball;
 mod bricks;
 mod pause_ui;
+mod forehead;
 
 use paddle::Paddle;
 use ball::Ball;
 use bricks::Bricks;
 use pause_ui::PauseUI;
+use forehead::ForeHead;
 
 const LINE_LENGTH: f32 = 30.0;
 const ANGLE_CHANGE: f32 = 0.04;
@@ -29,6 +33,7 @@ pub struct Game
     ball: Option<Ball>,
     bricks: Bricks,
     pause_ui: PauseUI,
+    forehead: ForeHead,
 
     phase: Phase,
 
@@ -40,23 +45,35 @@ impl Game
 {
     pub fn new(ctx: &mut Context) -> GameResult<Game>
     {
+        let bricks = Bricks::new(ctx, Bricks::make_pattern(vec![
+            vec![],
+            vec![1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
+            vec![11, 12, 13, 14, 15, 16, 17, 18, 19, 20]
+        ]))?;
+
+        let max_score = bricks.len();
+
         Ok(Game
         {
             paddle: Paddle::new(ctx)?,
             ball: None,
-            bricks: Bricks::new(ctx, Bricks::make_pattern(vec![
-                vec![],
-                vec![1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
-                vec![11, 12, 13, 14, 15, 16, 17, 18, 19, 20]
-            ]))?,
+            bricks: bricks,
             pause_ui: PauseUI::new(ctx)?,
+            forehead: ForeHead::new(ctx, max_score)?,
 
             phase: Phase::Shoot(utils::normalize([0.0, -1.0])),
 
             game_data: GameData
             {
+                score: 0,
+                timer: 0,
+
                 paddle_speed: 3.5f32,
                 pause_transition: false,
+
+                start_inst: None,
+                pause_inst: None,
+                pause_dur: Duration::new(0, 0),
             },
             input_data: InputData
             {
@@ -103,11 +120,36 @@ impl Game
                             self.paddle.rect().y + ball::BALL_SIZE
                         ],
                         *angle)?);
+
+                    if let Some(pause_inst) = self.game_data.pause_inst
+                    {
+                        self.game_data.pause_dur += Instant::now()
+                            .duration_since(pause_inst);
+                        self.game_data.pause_inst = None;
+                    }
+
+                    if let None = self.game_data.start_inst
+                    {
+                        self.game_data.start_inst = Some(Instant::now());
+                    }
+
                     self.phase = Phase::Bounce;
                 }
             }
             Phase::Bounce =>
             {
+                if let Some(start_inst) = self.game_data.start_inst
+                {
+                    let game_dur = Instant::now()
+                        .duration_since(start_inst) - self.game_data.pause_dur;
+
+                    if  game_dur.as_secs() as u32 > self.game_data.timer
+                    {
+                        self.game_data.timer = game_dur.as_secs() as u32;
+                        self.forehead.set_timer(ctx, self.game_data.timer);
+                    }
+                }
+
                 if self.input_data.left_down
                 {
                     self.paddle.shift(-self.game_data.paddle_speed);
@@ -119,10 +161,17 @@ impl Game
 
                 if let Some(ref mut ball) = &mut self.ball
                 {
-                    if !ball.update(&self.paddle, &mut self.bricks)
+                    let r = ball.update(&self.paddle, &mut self.bricks);
+                    if r.destroyed_ball
                     {
+                        self.game_data.pause_inst = Some(Instant::now());
                         self.ball = None;
                         self.phase = Phase::Shoot([0.0, -1.0])
+                    }
+                    if r.destroyed_brick
+                    {
+                        self.game_data.score += 1;
+                        self.forehead.set_score(ctx, self.game_data.score);
                     }
                 }
 
@@ -139,6 +188,7 @@ impl Game
                     if self.input_data.p_down
                     {
                         self.phase = Phase::Pause;
+                        self.game_data.pause_inst = Some(Instant::now());
                         self.game_data.pause_transition = true;
                     }
                 }
@@ -158,6 +208,12 @@ impl Game
                     if self.input_data.p_down
                     {
                         self.phase = Phase::Bounce;
+                        if let Some(pause_inst) = self.game_data.pause_inst
+                        {
+                            self.game_data.pause_dur += Instant::now()
+                                .duration_since(pause_inst);
+                            self.game_data.pause_inst = None;
+                        }
                         self.game_data.pause_transition = true;
                     }
                 }
@@ -165,7 +221,12 @@ impl Game
                 if self.pause_ui.resume_click()
                 {
                     self.pause_ui.reset();
-
+                    if let Some(pause_inst) = self.game_data.pause_inst
+                    {
+                        self.game_data.pause_dur += Instant::now()
+                            .duration_since(pause_inst);
+                        self.game_data.pause_inst = None;
+                    }
                     self.phase = Phase::Bounce;
                 }
                 if self.pause_ui.restart_click()
@@ -195,6 +256,11 @@ impl Game
         {
             paddle_speed: 3.5f32,
             pause_transition: false,
+            score: 0,
+            timer: 0,
+            start_inst: None,
+            pause_inst: None,
+            pause_dur: Duration::new(0, 0),
         };
         self.input_data = InputData
         {
@@ -203,7 +269,6 @@ impl Game
             enter_down: false,
             p_down: false,
         };
-
     }
 
     pub fn key_down(&mut self, key: KeyCode, _repeat: bool)
@@ -274,6 +339,7 @@ impl Game
             ball.draw(ctx)?;
         }
         self.bricks.draw(ctx)?;
+        self.forehead.draw(ctx)?;
 
         match &self.phase
         {
@@ -311,8 +377,15 @@ impl Game
 
 struct GameData
 {
+    score: u32,
+    timer: u32,
+    
     paddle_speed: f32,
     pause_transition: bool,
+
+    start_inst: Option<Instant>,
+    pause_inst: Option<Instant>,
+    pause_dur: Duration,
 }
 
 struct InputData

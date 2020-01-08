@@ -48,6 +48,11 @@ impl Bricks
         })
     }
 
+    pub fn len(&self) -> u32
+    {
+        self.bricks.len() as u32
+    }
+
     pub fn bricks(&mut self) -> &mut [Option<Brick>]
     {
         &mut self.bricks

@@ -51,8 +51,11 @@ impl Ball
         })
     }
 
-    pub fn update(&mut self, paddle: &Paddle, bricks: &mut Bricks) -> bool
+    // maybe there's a better way to do this
+    pub fn update(&mut self, paddle: &Paddle, bricks: &mut Bricks) -> UpdateReturn
     {
+        let mut destroyed_brick = false;
+
         // project position
         let proj =
         [
@@ -75,7 +78,11 @@ impl Ball
 
         if proj[1] - self.size > FOREHEAD + BOARD_HEIGHT
         {
-            return false;
+            return UpdateReturn
+            {
+                destroyed_ball: true,
+                destroyed_brick: destroyed_brick,
+            };
         }
 
         match utils::intersect_rect(self.pos, proj, self.size, paddle.rect())
@@ -135,6 +142,7 @@ impl Ball
                 if b.count == 0
                 {
                     *brick = None;
+                    destroyed_brick = true;
                 }
             }
         }
@@ -160,7 +168,11 @@ impl Ball
             self.pos = pos;
         }
 
-        true
+        return UpdateReturn
+        {
+            destroyed_ball: false,
+            destroyed_brick: destroyed_brick,
+        }
     }
 
     pub fn draw(&self, ctx: &mut Context) -> GameResult<()>
@@ -171,4 +183,10 @@ impl Ball
             DrawParam::new()
                 .dest(self.pos))
     }
+}
+
+pub struct UpdateReturn
+{
+    pub destroyed_ball: bool,
+    pub destroyed_brick: bool,
 }
