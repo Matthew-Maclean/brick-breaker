@@ -27,6 +27,8 @@ use forehead::ForeHead;
 const LINE_LENGTH: f32 = 30.0;
 const ANGLE_CHANGE: f32 = 0.04;
 
+const STARTING_LIVES: u32 = 3;
+
 pub struct Game
 {
     paddle: Paddle,
@@ -59,7 +61,7 @@ impl Game
             ball: None,
             bricks: bricks,
             pause_ui: PauseUI::new(ctx)?,
-            forehead: ForeHead::new(ctx, max_score)?,
+            forehead: ForeHead::new(ctx, max_score, STARTING_LIVES)?,
 
             phase: Phase::Shoot(utils::normalize([0.0, -1.0])),
 
@@ -68,7 +70,8 @@ impl Game
                 score: 0,
                 max_score: max_score,
                 timer: 0,
-
+                
+                lives: STARTING_LIVES,
                 paddle_speed: 3.5f32,
                 pause_transition: false,
 
@@ -190,6 +193,13 @@ impl Game
                     let r = ball.update(&self.paddle, &mut self.bricks);
                     if r.destroyed_ball
                     {
+                        // lose a life and update the forehead
+                        self.game_data.lives -= 1;
+                        self.forehead.set_lives(self.game_data.lives);
+                        if self.game_data.lives == 0
+                        {
+                            unimplemented!()
+                        }
                         // pause the timer
                         self.game_data.pause_inst = Some(Instant::now());
                         // get rid of the ball so it isn't drawn
@@ -203,6 +213,11 @@ impl Game
                         self.game_data.score += 1;
                         // update the score in the forehead
                         self.forehead.set_score(ctx, self.game_data.score);
+                        // >= for safety
+                        if self.game_data.score >= self.game_data.max_score
+                        {
+                            unimplemented!()
+                        }
                     }
                 }
                 
@@ -307,6 +322,7 @@ impl Game
             score: 0,
             max_score: self.bricks.total(),
             timer: 0,
+            lives: STARTING_LIVES,
             start_inst: None,
             pause_inst: None,
             pause_dur: Duration::new(0, 0),
@@ -436,7 +452,8 @@ struct GameData
     score: u32,
     max_score: u32,
     timer: u32,
-    
+
+    lives: u32,
     paddle_speed: f32,
     pause_transition: bool,
     
