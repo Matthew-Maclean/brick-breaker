@@ -44,6 +44,8 @@ impl Ball
             mesh: Mesh::new_circle(
                 ctx,
                 DrawMode::fill(),
+                // the mesh is at (0, 0) because we draw it at the ball position
+                // at draw time
                 [0f32, 0f32],
                 BALL_SIZE,
                 0.1,
@@ -109,7 +111,10 @@ impl Ball
             Some(utils::Axis::Y) => bounce_y_axis = true,
             None => { }
         }
-
+        
+        // the ball can only collide with one brick at a time,
+        // we choose the closest one that the projected ball position
+        // collides with
         let mut dist = ::std::f32::MAX;
         let mut collision = None;
         for brick in bricks.bricks().iter_mut() // bricks

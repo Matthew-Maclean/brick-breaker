@@ -1,33 +1,41 @@
+// helper functions for 2vectors
+// the length, ty pythagoras
 pub fn len(v: [f32; 2]) -> f32
 {
     f32::sqrt(f32::powi(v[0], 2) + f32::powi(v[1], 2))
 }
 
+// subtract vector from vector
 pub fn sub(l: [f32; 2], r: [f32; 2]) -> [f32; 2]
 {
     [l[0] - r[0], l[1] - r[1]]
 }
 
+// divide vector by scalar
 pub fn div(v: [f32; 2], n: f32) -> [f32; 2]
 {
     [v[0] / n, v[1] / n]
 }
 
+// multiply vector by scalar
 pub fn mul(v: [f32; 2], n: f32) -> [f32; 2]
 {
     [v[0] * n, v[1] * n]
 }
 
+// do product of 2vectors
 pub fn dot(l: [f32; 2], r: [f32; 2]) -> f32
 {
     l[0] * r[0] + l[1] * r[1]
 }
 
+// makes sure the length of a vector is one
 pub fn normalize(v: [f32; 2]) -> [f32; 2]
 {
     div(v, len(v))
 }
 
+// bounce on an an angle
 pub fn bounce_angle(v: [f32; 2], n: [f32; 2]) -> [f32; 2]
 {
     let n = normalize(n);
@@ -42,6 +50,7 @@ pub enum Axis
     Y,
 }
 
+// shortcut when the bounce is off of an axis
 pub fn bounce_axis(v: [f32; 2], axis: Axis) -> [f32; 2]
 {
     match axis
@@ -190,6 +199,7 @@ pub fn inside_rect(p: [f32; 2], s: f32, r: ggez::graphics::Rect) -> Option<[f32;
     }
 }
 
+// rotate a vector (keeps the length)
 pub fn rotate(v: [f32; 2], a: f32) -> [f32; 2]
 {
     [
@@ -198,6 +208,7 @@ pub fn rotate(v: [f32; 2], a: f32) -> [f32; 2]
     ]
 }
 
+// the angle between two vectors
 pub fn angle_between(v: [f32; 2], n: [f32; 2]) -> f32
 {
     f32::acos(dot(v, n) / (len(v) * len(n)))

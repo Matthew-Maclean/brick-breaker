@@ -89,8 +89,10 @@ impl Game
     {
         match &mut self.phase
         {
+            // the game starts in this phase, and returns to it if the ball is destroyed
             Phase::Shoot(ref mut angle) =>
             {
+                // rotate the angle of the ball shooter
                 if self.input_data.left_down
                 {
                     *angle = utils::rotate(*angle, -ANGLE_CHANGE);
@@ -100,6 +102,8 @@ impl Game
                     *angle = utils::rotate(*angle, ANGLE_CHANGE);
                 }
 
+                // confine the angle to between [-1.0, -0.15] to [1.0, -0.15]
+                // (y = 0 is the top of the window)
                 if utils::angle_between(*angle, [1.0, 0.0]) <
                     utils::angle_between([1.0, -0.15], [1.0, 0.0])
                 {
@@ -110,9 +114,12 @@ impl Game
                 {
                     *angle = [-1.0, -0.15]
                 }
-
+                
+                // shoot the ball
                 if self.input_data.enter_down
                 {
+                    // the ball has the angle of the current shooter angle,
+                    // and starts right above the center of the paddle
                     self.ball = Some(Ball::new(
                         ctx,
                         [
@@ -120,36 +127,50 @@ impl Game
                             self.paddle.rect().y + ball::BALL_SIZE
                         ],
                         *angle)?);
-
+                    
+                    // if the pause_inst is Some, then we have returned to this phase
+                    // after the ball was destroyed, so we need to update the pause
+                    // duration to keep the timer accurate
                     if let Some(pause_inst) = self.game_data.pause_inst
                     {
                         self.game_data.pause_dur += Instant::now()
                             .duration_since(pause_inst);
+                        // also unset the last pause instance
                         self.game_data.pause_inst = None;
                     }
-
+                    
+                    // if the start_inst is none, then this is the first time we've been in this
+                    // phase, so this marks the start of the timer
+                    // (this should not be true if pause_inst is Some)
                     if let None = self.game_data.start_inst
                     {
                         self.game_data.start_inst = Some(Instant::now());
                     }
 
+                    // move to the next phase
                     self.phase = Phase::Bounce;
                 }
             }
+            // this is the main gameplay phase
             Phase::Bounce =>
             {
+                // update the timer
                 if let Some(start_inst) = self.game_data.start_inst
                 {
+                    // the current game duration, minus the time spent paused
                     let game_dur = Instant::now()
                         .duration_since(start_inst) - self.game_data.pause_dur;
-
+                    
+                    // the timer is in seconds only, so only update it if at least one
+                    // more second has passed
                     if  game_dur.as_secs() as u32 > self.game_data.timer
                     {
                         self.game_data.timer = game_dur.as_secs() as u32;
                         self.forehead.set_timer(ctx, self.game_data.timer);
                     }
                 }
-
+                
+                // move the paddle, the paddle will handle confining itself to the board
                 if self.input_data.left_down
                 {
                     self.paddle.shift(-self.game_data.paddle_speed);
@@ -158,23 +179,34 @@ impl Game
                 {
                     self.paddle.shift(self.game_data.paddle_speed);
                 }
-
+                
+                // this should always be true in the bounce phase
+                // (maybe .expect() it?)
                 if let Some(ref mut ball) = &mut self.ball
                 {
+                    // the ball update handles all bouncing, including going off the board
+                    // and being destroyed, and bouncing off of / breaking bricks
                     let r = ball.update(&self.paddle, &mut self.bricks);
                     if r.destroyed_ball
                     {
+                        // pause the timer
                         self.game_data.pause_inst = Some(Instant::now());
+                        // get rid of the ball so it isn't drawn
                         self.ball = None;
+                        // go back to the shooting phase
                         self.phase = Phase::Shoot([0.0, -1.0])
                     }
                     if r.destroyed_brick
                     {
+                        // up the score
                         self.game_data.score += 1;
+                        // update the score in the forehead
                         self.forehead.set_score(ctx, self.game_data.score);
                     }
                 }
-
+                
+                // if pause_transition is still set from the pause phase, and the
+                // 'p' key has been released, unset pause_transition
                 if self.game_data.pause_transition
                 {
                     if !self.input_data.p_down
@@ -183,18 +215,25 @@ impl Game
                     }
                 }
                 
+                // if pause_transition is unset, and the 'p' is pressed, go the the pause phase
                 if !self.game_data.pause_transition
                 {
                     if self.input_data.p_down
                     {
+                        // change the phase
                         self.phase = Phase::Pause;
+                        // pause the timer
                         self.game_data.pause_inst = Some(Instant::now());
+                        // since this pause comes from the key press, set pause_transition
+                        // so that the game won't immediately unpause
                         self.game_data.pause_transition = true;
                     }
                 }
             },
             Phase::Pause =>
             {
+                // if pause_transiton is set, and the 'p' key has been released,
+                // unset pause_transition
                 if self.game_data.pause_transition
                 {
                     if !self.input_data.p_down
@@ -202,22 +241,29 @@ impl Game
                         self.game_data.pause_transition = false;
                     }
                 }
-
+                
+                // if the pause_transiton is unset, and the 'p' key is pressed, unpause
                 if !self.game_data.pause_transition
                 {
                     if self.input_data.p_down
                     {
+                        // change the phase
                         self.phase = Phase::Bounce;
+                        // if pause_inst is Some, update the pause duration
+                        // (this should always be set, maybe .expect() it?)
                         if let Some(pause_inst) = self.game_data.pause_inst
                         {
                             self.game_data.pause_dur += Instant::now()
                                 .duration_since(pause_inst);
                             self.game_data.pause_inst = None;
                         }
+                        // 'p' was pressed, so set pause_transition
                         self.game_data.pause_transition = true;
                     }
                 }
-
+                
+                // the other way of unpausing, do the same stuff as before but don't
+                // set pause_transition, since the 'p' key wasn't pressed
                 if self.pause_ui.resume_click()
                 {
                     self.pause_ui.reset();
@@ -231,6 +277,7 @@ impl Game
                 }
                 if self.pause_ui.restart_click()
                 {
+                    // restarts the whole thing
                     self.reset();
                 }
                 if self.pause_ui.main_menu_click()
@@ -333,6 +380,9 @@ impl Game
 
     pub fn draw(&mut self, ctx: &mut Context) -> GameResult<()>
     {
+        // the paddle, bricks, ball, and forehead are always drawn,
+        // we draw them before so that if something (like the pause menu)
+        // wants to cover them it can
         self.paddle.draw(ctx)?;
         if let Some(ref ball) = &self.ball
         {
@@ -343,6 +393,7 @@ impl Game
 
         match &self.phase
         {
+            // in she shoot phase, draw the ball shooter 
             Phase::Shoot(ref angle) =>
             {
                 use ggez::graphics;
@@ -352,7 +403,8 @@ impl Game
                     self.paddle.rect().x + self.paddle.rect().w / 2.0,
                     self.paddle.rect().y
                 ];
-
+                
+                // it's a line
                 let line = graphics::Mesh::new_line(
                     ctx,
                     &[
@@ -364,7 +416,9 @@ impl Game
 
                 graphics::draw(ctx, &line, graphics::DrawParam::new())?;
             },
+            // the bounce phase has nothing special to draw, as everything is already drawn
             Phase::Bounce => { },
+            // in this phase we draw the pause menu
             Phase::Pause =>
             {
                 self.pause_ui.draw(ctx)?;
@@ -382,9 +436,12 @@ struct GameData
     
     paddle_speed: f32,
     pause_transition: bool,
-
+    
+    // the time at the start of the game
     start_inst: Option<Instant>,
+    // the last time the timer was paused
     pause_inst: Option<Instant>,
+    // the total pause time of the game
     pause_dur: Duration,
 }
 
