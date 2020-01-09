@@ -48,9 +48,10 @@ impl Bricks
         })
     }
 
-    pub fn len(&self) -> u32
+    pub fn total(&self) -> u32
     {
-        self.bricks.len() as u32
+        self.bricks.iter()
+            .fold(0, |a, b| { a + if let Some(b) = b { b.count } else { 0 } })
     }
 
     pub fn bricks(&mut self) -> &mut [Option<Brick>]

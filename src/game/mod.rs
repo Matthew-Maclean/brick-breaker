@@ -51,7 +51,7 @@ impl Game
             vec![11, 12, 13, 14, 15, 16, 17, 18, 19, 20]
         ]))?;
 
-        let max_score = bricks.len();
+        let max_score = bricks.total();
 
         Ok(Game
         {
@@ -66,6 +66,7 @@ impl Game
             game_data: GameData
             {
                 score: 0,
+                max_score: max_score,
                 timer: 0,
 
                 paddle_speed: 3.5f32,
@@ -196,7 +197,7 @@ impl Game
                         // go back to the shooting phase
                         self.phase = Phase::Shoot([0.0, -1.0])
                     }
-                    if r.destroyed_brick
+                    if r.collided_brick
                     {
                         // up the score
                         self.game_data.score += 1;
@@ -304,6 +305,7 @@ impl Game
             paddle_speed: 3.5f32,
             pause_transition: false,
             score: 0,
+            max_score: self.bricks.total(),
             timer: 0,
             start_inst: None,
             pause_inst: None,
@@ -432,6 +434,7 @@ impl Game
 struct GameData
 {
     score: u32,
+    max_score: u32,
     timer: u32,
     
     paddle_speed: f32,

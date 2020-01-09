@@ -56,7 +56,7 @@ impl Ball
     // maybe there's a better way to do this
     pub fn update(&mut self, paddle: &Paddle, bricks: &mut Bricks) -> UpdateReturn
     {
-        let mut destroyed_brick = false;
+        let mut collided_brick = false;
 
         // project position
         let proj =
@@ -83,7 +83,7 @@ impl Ball
             return UpdateReturn
             {
                 destroyed_ball: true,
-                destroyed_brick: destroyed_brick,
+                collided_brick: collided_brick,
             };
         }
 
@@ -147,8 +147,8 @@ impl Ball
                 if b.count == 0
                 {
                     *brick = None;
-                    destroyed_brick = true;
                 }
+                collided_brick = true;
             }
         }
 
@@ -176,7 +176,7 @@ impl Ball
         return UpdateReturn
         {
             destroyed_ball: false,
-            destroyed_brick: destroyed_brick,
+            collided_brick: collided_brick,
         }
     }
 
@@ -193,5 +193,5 @@ impl Ball
 pub struct UpdateReturn
 {
     pub destroyed_ball: bool,
-    pub destroyed_brick: bool,
+    pub collided_brick: bool,
 }
