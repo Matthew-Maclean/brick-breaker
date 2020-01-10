@@ -22,6 +22,7 @@ const HEIGHT: f32 = BOARD_HEIGHT + FOREHEAD;
 
 mod ui;
 mod window;
+mod state;
 mod game;
 
 fn main() -> GameResult<()>

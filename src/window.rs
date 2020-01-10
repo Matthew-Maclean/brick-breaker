@@ -14,12 +14,12 @@ use ggez::
     event::EventHandler,
 };
 
+use crate::state::State;
 use crate::game::Game;
 
 pub struct Window
 {
-    // temporary
-    game: Game,
+    state: State,
 }
 
 impl Window
@@ -28,7 +28,7 @@ impl Window
     {
         Ok(Window
         {
-            game: Game::new(ctx)?
+            state: State::Game(Game::new(ctx)?),
         })
     }
 }
@@ -37,22 +37,38 @@ impl EventHandler for Window
 {
     fn update(&mut self, ctx: &mut Context) -> GameResult<()>
     {
-        self.game.update(ctx)
+        match &mut self.state
+        {
+            State::Game(ref mut game) => game.update(ctx),
+            _ => Ok(()),
+        }
     }
 
     fn key_down_event(&mut self, _ctx: &mut Context, key: KeyCode, _mods: KeyMods, repeat: bool)
     {
-        self.game.key_down(key, repeat)
+        match &mut self.state
+        {
+            State::Game(ref mut game) => game.key_down(key, repeat),
+            _ => { },
+        }
     }
 
     fn key_up_event(&mut self, _ctx: &mut Context, key: KeyCode, _mods: KeyMods)
     {
-        self.game.key_up(key)
+        match &mut self.state
+        {
+            State::Game(ref mut game) => game.key_up(key),
+            _ => { },
+        }
     }
 
     fn mouse_motion_event(&mut self, _ctx: &mut Context, x: f32, y: f32, _: f32, _: f32)
     {
-        self.game.mouse_move(x, y)
+        match &mut self.state
+        {
+            State::Game(ref mut game) => game.mouse_move(x, y),
+            _ => { },
+        }
     }
 
     fn mouse_button_down_event(
@@ -62,7 +78,11 @@ impl EventHandler for Window
         x: f32,
         y: f32)
     {
-        self.game.mouse_down(button, x, y)
+        match &mut self.state
+        {
+            State::Game(ref mut game) => game.mouse_down(button, x, y),
+            _ => { },
+        }
     }
 
     fn mouse_button_up_event(
@@ -72,7 +92,11 @@ impl EventHandler for Window
         _: f32,
         _: f32)
     {
-        self.game.mouse_up(button)
+        match &mut self.state
+        {
+            State::Game(ref mut game) => game.mouse_up(button),
+            _ => { },
+        }
     }
 
     fn draw(&mut self, ctx: &mut Context) -> GameResult<()>
@@ -81,7 +105,11 @@ impl EventHandler for Window
 
         graphics::clear(ctx, graphics::WHITE);
 
-        self.game.draw(ctx)?;
+        match &mut self.state
+        {
+            State::Game(ref mut game) => game.draw(ctx)?,
+            _ => { },
+        }
 
         graphics::present(ctx)
     }
