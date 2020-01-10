@@ -15,6 +15,7 @@ use ggez::
 };
 
 use crate::state::State;
+use crate::menu::Menu;
 use crate::game::Game;
 
 pub struct Window
@@ -28,7 +29,7 @@ impl Window
     {
         Ok(Window
         {
-            state: State::Game(Game::new(ctx)?),
+            state: State::Menu(Menu::new(ctx)?),
         })
     }
 }
@@ -39,9 +40,15 @@ impl EventHandler for Window
     {
         match &mut self.state
         {
-            State::Game(ref mut game) => game.update(ctx),
-            _ => Ok(()),
+            State::Menu(ref mut menu) => if let Some(state) = menu.update(ctx)?
+            {
+                self.state = state;
+            },
+            State::Game(ref mut game) => game.update(ctx)?,
+            _ => { },
         }
+
+        Ok(())
     }
 
     fn key_down_event(&mut self, _ctx: &mut Context, key: KeyCode, _mods: KeyMods, repeat: bool)
@@ -66,6 +73,7 @@ impl EventHandler for Window
     {
         match &mut self.state
         {
+            State::Menu(ref mut menu) => menu.mouse_move(x, y),
             State::Game(ref mut game) => game.mouse_move(x, y),
             _ => { },
         }
@@ -80,6 +88,7 @@ impl EventHandler for Window
     {
         match &mut self.state
         {
+            State::Menu(ref mut menu) => menu.mouse_down(button, x, y),
             State::Game(ref mut game) => game.mouse_down(button, x, y),
             _ => { },
         }
@@ -94,6 +103,7 @@ impl EventHandler for Window
     {
         match &mut self.state
         {
+            State::Menu(ref mut menu) => menu.mouse_up(button),
             State::Game(ref mut game) => game.mouse_up(button),
             _ => { },
         }
@@ -107,6 +117,7 @@ impl EventHandler for Window
 
         match &mut self.state
         {
+            State::Menu(ref mut menu) => menu.draw(ctx)?,
             State::Game(ref mut game) => game.draw(ctx)?,
             _ => { },
         }

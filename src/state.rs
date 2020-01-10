@@ -1,9 +1,10 @@
 use crate::game::Game;
+use crate::menu::Menu;
 
 pub enum State
 {
     // the main menu
-    Menu,
+    Menu(Menu),
     // the level select menu
     LevelSelect,
     // the gameplay
