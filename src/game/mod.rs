@@ -11,6 +11,12 @@ use ggez::
 
 use std::time::{Instant, Duration};
 
+use crate::
+{
+    state::State,
+    menu::Menu,
+};
+
 mod utils;
 mod paddle;
 mod ball;
@@ -85,7 +91,7 @@ impl Game
         })
     }
 
-    pub fn update(&mut self, ctx: &mut Context) -> GameResult<()>
+    pub fn update(&mut self, ctx: &mut Context) -> GameResult<Option<State>>
     {
         match &mut self.phase
         {
@@ -294,12 +300,12 @@ impl Game
                 }
                 if self.pause_ui.main_menu_click()
                 {
-                    unimplemented!()
+                    return Ok(Some(State::Menu(Menu::new(ctx)?)))
                 }
             },
         }
         
-        Ok(())
+        Ok(None)
     }
 
     pub fn reset(&mut self)

@@ -48,7 +48,10 @@ impl EventHandler for Window
             {
                 self.state = state;
             },
-            State::Game(ref mut game) => game.update(ctx)?,
+            State::Game(ref mut game) => if let Some(state) = game.update(ctx)?
+            {
+                self.state = state;
+            },
             _ => { },
         }
 
