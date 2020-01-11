@@ -45,9 +45,9 @@ pub struct Game
 
 impl Game
 {
-    pub fn new(ctx: &mut Context, bricks: Vec<Vec<u32>>) -> GameResult<Game>
+    pub fn new(ctx: &mut Context, bricks: u32) -> GameResult<Game>
     {
-        let bricks = Bricks::new(ctx, Bricks::make_pattern(bricks))?;
+        let bricks = Bricks::get_pattern(ctx, bricks)?;
 
         let max_score = bricks.total();
 

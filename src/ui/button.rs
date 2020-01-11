@@ -41,7 +41,9 @@ impl Button
         let button = Mesh::new_rectangle(
             ctx,
             DrawMode::fill(),
-            rect,
+            Rect::new(0.0, 0.0,
+            text_rect.w + border * 2.0,
+            text_rect.h + border * 2.0),
             graphics::WHITE)?;
 
         Ok(Button
@@ -58,6 +60,14 @@ impl Button
     pub fn rect(&self) -> Rect
     {
         self.rect
+    }
+
+    pub fn move_to(&mut self, x: f32, y: f32)
+    {
+        let border = self.text.rect().left() - self.rect.left();
+
+        self.rect.move_to([x, y]);
+        self.text.move_to(x + border, y + border);
     }
 
     pub fn reset(&mut self)
@@ -103,6 +113,7 @@ impl Button
     pub fn draw(&self, ctx: &mut Context) -> GameResult<()>
     {
         graphics::draw(ctx, &self.button, DrawParam::new()
+            .dest(self.rect.point())
             .color(if self.click
             {
                 Color::from_rgb(64, 64, 64)

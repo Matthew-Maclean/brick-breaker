@@ -132,6 +132,43 @@ impl Bricks
 
         pattern
     }
+
+    pub fn get_pattern(ctx: &mut Context, level: u32) -> GameResult<Bricks>
+    {
+        match level
+        {
+            0  => Bricks::new(ctx, Bricks::make_pattern(Vec::new())),
+            1  => Bricks::new(ctx, Bricks::make_pattern(vec![
+                vec![],
+                vec![],
+                vec![1, 1, 1, 1, 1, 1, 1, 1],
+                vec![1, 1, 1, 1, 1, 1, 1, 1],
+                vec![1, 1, 1, 1, 1, 1, 1, 1],
+            ])),
+            2  => Bricks::new(ctx, Bricks::make_pattern(vec![
+                vec![],
+                vec![],
+                vec![1, 1, 2, 2, 2, 2, 1, 1],
+                vec![1, 1, 2, 3, 3, 2, 1, 1],
+                vec![1, 1, 2, 2, 2, 2, 1, 1],
+            ])),
+            3  => Bricks::new(ctx, Bricks::make_pattern(vec![
+                vec![],
+                vec![],
+                vec![2, 2, 2, 2, 2, 2, 2, 2],
+                vec![2, 3, 3, 4, 4, 3, 3, 2],
+                vec![2, 2, 2, 2, 2, 2, 2, 2],
+            ])),
+            4  => Bricks::new(ctx, Bricks::make_pattern(vec![])),
+            5  => Bricks::new(ctx, Bricks::make_pattern(vec![])),
+            6  => Bricks::new(ctx, Bricks::make_pattern(vec![])),
+            7  => Bricks::new(ctx, Bricks::make_pattern(vec![])),
+            8  => Bricks::new(ctx, Bricks::make_pattern(vec![])),
+            9  => Bricks::new(ctx, Bricks::make_pattern(vec![])),
+            10 => Bricks::new(ctx, Bricks::make_pattern(vec![])),
+            x => panic!("level outside of range!"),
+        }
+    }
 }
 
 #[derive(Copy, Clone)]

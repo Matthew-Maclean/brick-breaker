@@ -24,6 +24,7 @@ mod ui;
 mod window;
 mod state;
 mod menu;
+mod level_select;
 mod game;
 
 fn main() -> GameResult<()>

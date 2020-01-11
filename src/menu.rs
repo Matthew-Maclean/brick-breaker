@@ -10,6 +10,7 @@ use crate::BOARD_WIDTH;
 use crate::
 {
     state::State,
+    level_select::LevelSelect,
     ui::{TextRect, Button},
 };
 
@@ -67,7 +68,7 @@ impl Menu
     {
         if self.level_select.click()
         {
-            unimplemented!();
+            return Ok(Some(State::LevelSelect(LevelSelect::new(ctx)?)))
         }
         if self.exit.click()
         {

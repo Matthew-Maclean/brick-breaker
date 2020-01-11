@@ -60,6 +60,11 @@ impl TextRect
         self
     }
 
+    pub fn move_to(&mut self, x: f32, y: f32)
+    {
+        self.rect.move_to([x, y]);
+    }
+
     pub fn change_text(&mut self, ctx: &mut Context, text: impl ToString)
     {
         let mut t = Text::new(text.to_string());
