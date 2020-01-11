@@ -55,7 +55,10 @@ impl EventHandler for Window
             {
                 self.state = state;
             },
-            _ => { },
+            State::LevelLose(ref mut ll) => if let Some(state) = ll.update(ctx)?
+            {
+                self.state = state;
+            },
         }
 
         Ok(())
@@ -87,7 +90,7 @@ impl EventHandler for Window
             State::LevelSelect(ref mut ls) => ls.mouse_move(x, y),
             State::Game(ref mut game) => game.mouse_move(x, y),
             State::LevelClear(ref mut lc) => lc.mouse_move(x, y),
-            _ => { },
+            State::LevelLose(ref mut ll) => ll.mouse_move(x, y),
         }
     }
 
@@ -104,7 +107,7 @@ impl EventHandler for Window
             State::LevelSelect(ref mut ls) => ls.mouse_down(button, x, y),
             State::Game(ref mut game) => game.mouse_down(button, x, y),
             State::LevelClear(ref mut lc) => lc.mouse_down(button, x, y),
-            _ => { },
+            State::LevelLose(ref mut ll) => ll.mouse_down(button, x, y),
         }
     }
 
@@ -121,7 +124,7 @@ impl EventHandler for Window
             State::LevelSelect(ref mut ls) => ls.mouse_up(button),
             State::Game(ref mut game) => game.mouse_up(button),
             State::LevelClear(ref mut lc) => lc.mouse_up(button),
-            _ => { },
+            State::LevelLose(ref mut ll) => ll.mouse_up(button),
         }
     }
 
@@ -137,7 +140,7 @@ impl EventHandler for Window
             State::LevelSelect(ref mut ls) => ls.draw(ctx)?,
             State::Game(ref mut game) => game.draw(ctx)?,
             State::LevelClear(ref mut lc) => lc.draw(ctx)?,
-            _ => { },
+            State::LevelLose(ref mut ll) => ll.draw(ctx)?,
         }
 
         graphics::present(ctx)

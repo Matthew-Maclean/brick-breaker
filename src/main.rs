@@ -30,6 +30,7 @@ mod menu;
 mod level_select;
 mod game;
 mod level_clear;
+mod level_lose;
 
 fn main() -> GameResult<()>
 {

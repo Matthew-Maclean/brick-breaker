@@ -16,6 +16,7 @@ use crate::
     state::State,
     menu::Menu,
     level_clear::LevelClear,
+    level_lose::LevelLose,
 };
 
 mod utils;
@@ -202,7 +203,12 @@ impl Game
                         self.forehead.set_lives(self.game_data.lives);
                         if self.game_data.lives == 0
                         {
-                            unimplemented!()
+                            return Ok(Some(State::LevelLose(LevelLose::new(
+                                ctx,
+                                self.game_data.timer,
+                                self.game_data.score,
+                                self.game_data.max_score,
+                                self.game_data.level)?)))
                         }
                         // pause the timer
                         self.game_data.pause_inst = Some(Instant::now());
