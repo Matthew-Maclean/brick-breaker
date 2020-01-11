@@ -5,7 +5,7 @@ use ggez::
     input::mouse::MouseButton,
 };
 
-use crate::BOARD_WIDTH;
+use crate::{BOARD_WIDTH, MAX_LEVEL};
 use crate::
 {
     state::State,
@@ -66,7 +66,7 @@ impl LevelSelect
         let mut left = Vec::new();
         let mut right = Vec::new();
 
-        for i in 1..=5
+        for i in 1..=(MAX_LEVEL / 2)
         {
             let t = TextRect::new(ctx, 0.0, 0.0, format!("Level {}", i), None, LEVEL_SIZE, None);
             let b = Button::new(ctx, t, LEVEL_BORDER)?;
@@ -79,7 +79,7 @@ impl LevelSelect
             left.push(b);
         }
 
-        for i in 6..=10
+        for i in (MAX_LEVEL / 2 + 1)..=MAX_LEVEL
         {
             let t = TextRect::new(ctx, 0.0, 0.0, format!("Level {}", i), None, LEVEL_SIZE, None);
             let b = Button::new(ctx, t, LEVEL_BORDER)?;

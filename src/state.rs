@@ -3,6 +3,7 @@ use crate::
     menu::Menu,
     level_select::LevelSelect,
     game::Game,
+    level_clear::LevelClear,
 };
 
 pub enum State
@@ -14,7 +15,7 @@ pub enum State
     // the gameplay
     Game(Game),
     // the level clear screen
-    LevelClear,
+    LevelClear(LevelClear),
     // the level lose screen
     LevelLose,
 }

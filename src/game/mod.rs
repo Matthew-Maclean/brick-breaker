@@ -15,6 +15,7 @@ use crate::
 {
     state::State,
     menu::Menu,
+    level_clear::LevelClear,
 };
 
 mod utils;
@@ -51,9 +52,9 @@ pub struct Game
 
 impl Game
 {
-    pub fn new(ctx: &mut Context, bricks: u32) -> GameResult<Game>
+    pub fn new(ctx: &mut Context, level: u32) -> GameResult<Game>
     {
-        let bricks = Bricks::get_pattern(ctx, bricks)?;
+        let bricks = Bricks::get_pattern(ctx, level)?;
 
         let max_score = bricks.total();
 
@@ -63,7 +64,7 @@ impl Game
             ball: None,
             bricks: bricks,
             pause_ui: PauseUI::new(ctx)?,
-            forehead: ForeHead::new(ctx, max_score, STARTING_LIVES)?,
+            forehead: ForeHead::new(ctx, level, max_score, STARTING_LIVES)?,
 
             phase: Phase::Shoot(utils::normalize([0.0, -1.0])),
 
@@ -72,6 +73,7 @@ impl Game
                 score: 0,
                 max_score: max_score,
                 timer: 0,
+                level: level,
                 
                 lives: STARTING_LIVES,
                 paddle_speed: 3.5f32,
@@ -218,7 +220,10 @@ impl Game
                         // >= for safety
                         if self.game_data.score >= self.game_data.max_score
                         {
-                            unimplemented!()
+                            return Ok(Some(State::LevelClear(LevelClear::new(
+                                ctx,
+                                self.game_data.timer,
+                                self.game_data.level)?)));
                         }
                     }
                 }
@@ -322,6 +327,7 @@ impl Game
             paddle_speed: 3.5f32,
             pause_transition: false,
             score: 0,
+            level: self.game_data.level,
             max_score: self.bricks.total(),
             timer: 0,
             lives: STARTING_LIVES,
@@ -454,6 +460,7 @@ struct GameData
     score: u32,
     max_score: u32,
     timer: u32,
+    level: u32,
 
     lives: u32,
     paddle_speed: f32,

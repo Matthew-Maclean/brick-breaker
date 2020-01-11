@@ -13,7 +13,7 @@ use ggez::
     },
 };
 
-use crate::{BOARD_WIDTH, FOREHEAD};
+use crate::{BOARD_WIDTH, FOREHEAD, MAX_LEVEL};
 
 pub const BRICK_WIDTH: f32 = 32.36f32;
 pub const BRICK_HEIGHT: f32 = 20f32;
@@ -159,14 +159,18 @@ impl Bricks
                 vec![2, 3, 3, 4, 4, 3, 3, 2],
                 vec![2, 2, 2, 2, 2, 2, 2, 2],
             ])),
-            4  => Bricks::new(ctx, Bricks::make_pattern(vec![])),
+            4  => Bricks::new(ctx, Bricks::make_pattern(vec![
+                vec![1],
+            ])),
             5  => Bricks::new(ctx, Bricks::make_pattern(vec![])),
             6  => Bricks::new(ctx, Bricks::make_pattern(vec![])),
             7  => Bricks::new(ctx, Bricks::make_pattern(vec![])),
             8  => Bricks::new(ctx, Bricks::make_pattern(vec![])),
             9  => Bricks::new(ctx, Bricks::make_pattern(vec![])),
-            10 => Bricks::new(ctx, Bricks::make_pattern(vec![])),
-            x => panic!("level outside of range!"),
+            10 => Bricks::new(ctx, Bricks::make_pattern(vec![
+                vec![20],
+            ])),
+            x => panic!("level outside of range! (was {}, max {})", x, MAX_LEVEL),
         }
     }
 }

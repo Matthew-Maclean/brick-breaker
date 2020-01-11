@@ -16,7 +16,6 @@ use ggez::
 
 use crate::state::State;
 use crate::menu::Menu;
-use crate::game::Game;
 
 pub struct Window
 {
@@ -52,6 +51,10 @@ impl EventHandler for Window
             {
                 self.state = state;
             },
+            State::LevelClear(ref mut lc) => if let Some(state) = lc.update(ctx)?
+            {
+                self.state = state;
+            },
             _ => { },
         }
 
@@ -83,6 +86,7 @@ impl EventHandler for Window
             State::Menu(ref mut menu) => menu.mouse_move(x, y),
             State::LevelSelect(ref mut ls) => ls.mouse_move(x, y),
             State::Game(ref mut game) => game.mouse_move(x, y),
+            State::LevelClear(ref mut lc) => lc.mouse_move(x, y),
             _ => { },
         }
     }
@@ -99,6 +103,7 @@ impl EventHandler for Window
             State::Menu(ref mut menu) => menu.mouse_down(button, x, y),
             State::LevelSelect(ref mut ls) => ls.mouse_down(button, x, y),
             State::Game(ref mut game) => game.mouse_down(button, x, y),
+            State::LevelClear(ref mut lc) => lc.mouse_down(button, x, y),
             _ => { },
         }
     }
@@ -115,6 +120,7 @@ impl EventHandler for Window
             State::Menu(ref mut menu) => menu.mouse_up(button),
             State::LevelSelect(ref mut ls) => ls.mouse_up(button),
             State::Game(ref mut game) => game.mouse_up(button),
+            State::LevelClear(ref mut lc) => lc.mouse_up(button),
             _ => { },
         }
     }
@@ -130,6 +136,7 @@ impl EventHandler for Window
             State::Menu(ref mut menu) => menu.draw(ctx)?,
             State::LevelSelect(ref mut ls) => ls.draw(ctx)?,
             State::Game(ref mut game) => game.draw(ctx)?,
+            State::LevelClear(ref mut lc) => lc.draw(ctx)?,
             _ => { },
         }
 

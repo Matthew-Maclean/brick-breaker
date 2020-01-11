@@ -38,7 +38,7 @@ impl Menu
             title.rect().bottom() + BORDER,
             "Level Select",
             None,
-            35.0,
+            SIZE,
             None)
             .center_x(BOARD_WIDTH);
 
@@ -50,7 +50,7 @@ impl Menu
             level_select.rect().bottom() + BORDER,
             "Exit",
             None,
-            35.0,
+            SIZE,
             None)
             .center_x(BOARD_WIDTH);
 

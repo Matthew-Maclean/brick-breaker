@@ -20,12 +20,16 @@ const FOREHEAD: f32 = 50f32;
 const WIDTH: f32 = BOARD_WIDTH;
 const HEIGHT: f32 = BOARD_HEIGHT + FOREHEAD;
 
+// the highest level
+const MAX_LEVEL: u32 = 10;
+
 mod ui;
 mod window;
 mod state;
 mod menu;
 mod level_select;
 mod game;
+mod level_clear;
 
 fn main() -> GameResult<()>
 {

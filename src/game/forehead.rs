@@ -31,13 +31,16 @@ pub struct ForeHead
     ball_r: f32,
     ball: Mesh,
 
+    level_text: TextRect,
+    
     lives: u32,
     max_score: u32,
 }
 
 impl ForeHead
 {
-    pub fn new(ctx: &mut Context, max_score: u32, starting_lives: u32) -> GameResult<ForeHead>
+    pub fn new(ctx: &mut Context, level: u32, max_score: u32, starting_lives: u32)
+        -> GameResult<ForeHead>
     {
         let size = (FOREHEAD - BORDER * 2.0 - SEP) / 2.0;
         let score_text = TextRect::new(
@@ -77,6 +80,15 @@ impl ForeHead
             ((FOREHEAD - BORDER * 2.0 - (starting_lives as f32- 1.0) * SEP) / starting_lives as f32)
             / 2.0;
 
+        let level_text = TextRect::new(
+            ctx,
+            0.0, BORDER,
+            format!("Level {}", level),
+            None,
+            size,
+            Some(graphics::WHITE))
+            .center_x(BOARD_WIDTH);
+
         Ok(ForeHead
         {
             bg: Mesh::new_rectangle(
@@ -96,7 +108,7 @@ impl ForeHead
                 ball_r,
                 0.01,
                 graphics::WHITE)?,
-            
+            level_text: level_text,
             lives: starting_lives,
             max_score: max_score,
         })
@@ -126,6 +138,8 @@ impl ForeHead
         
         self.timer_text.draw(ctx)?;
         self.timer_val.draw(ctx)?;
+
+        self.level_text.draw(ctx)?;
 
         for i in 0..self.lives
         {
