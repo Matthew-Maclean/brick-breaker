@@ -10,7 +10,6 @@ use crate::
 {
     state::State,
     menu::Menu,
-    level_select::LevelSelect,
     game::Game,
     ui::{TextRect, Button},
 };
@@ -27,7 +26,6 @@ pub struct LevelClear
     next: Option<Button>,
     menu: Button,
 
-    time: u32,
     level: u32,
 }
 
@@ -81,7 +79,6 @@ impl LevelClear
             next: next,
             menu: menu,
 
-            time: time,
             level: level,
         })
     }
