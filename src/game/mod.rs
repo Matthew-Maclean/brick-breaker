@@ -307,7 +307,7 @@ impl Game
                 if self.pause_ui.restart_click()
                 {
                     // restarts the whole thing
-                    self.reset();
+                    self.reset(ctx);
                 }
                 if self.pause_ui.main_menu_click()
                 {
@@ -319,11 +319,12 @@ impl Game
         Ok(None)
     }
 
-    pub fn reset(&mut self)
+    fn reset(&mut self, ctx: &mut Context)
     {
         self.paddle.reset();
         self.ball = None;
         self.bricks.reset();
+        self.forehead.reset(ctx);
         self.pause_ui.reset();
 
         self.phase = Phase::Shoot(utils::normalize([0.0, -1.0]));

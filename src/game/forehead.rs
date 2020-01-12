@@ -34,6 +34,7 @@ pub struct ForeHead
     level_text: TextRect,
     
     lives: u32,
+    starting_lives: u32,
     max_score: u32,
 }
 
@@ -110,6 +111,7 @@ impl ForeHead
                 graphics::WHITE)?,
             level_text: level_text,
             lives: starting_lives,
+            starting_lives: starting_lives,
             max_score: max_score,
         })
     }
@@ -127,6 +129,13 @@ impl ForeHead
     pub fn set_lives(&mut self, lives: u32)
     {
         self.lives = lives;
+    }
+
+    pub fn reset(&mut self, ctx: &mut Context)
+    {
+        self.score_val.change_text(ctx, format!("000/{:03}", self.max_score));
+        self.timer_val.change_text(ctx, "0000");
+        self.lives = self.starting_lives;
     }
 
     pub fn draw(&self, ctx: &mut Context) -> GameResult<()>
